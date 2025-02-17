@@ -1,35 +1,94 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Header } from "@/app/components/Header"
-import { Footer } from "@/app/components/Footer"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "sonner";
+import { signIn } from "next-auth/react";
+import Spinner from "@/components/ui/spinner/spinner";
+
+type UserRole = "job_seeker" | "employer";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState<UserRole>("job_seeker");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically handle the login logic
-    console.log("Login attempted with:", { email, password })
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email: email,
+        password: password,
+        role: role,
+        redirectTo: "/",
+      });
+
+      setIsLoading(false);
+
+      if (!res?.error) {
+        toast.success("Successfully logged in");
+        router.push("/");
+      } else {
+        if (res.error.includes("CallbackRouteError")) {
+          toast.error("Selected role does not match your account");
+        } else {
+          toast.error("Invalid email or password");
+        }
+      }
+    } catch (error) {
+      toast.warning("Login Failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
       <main className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Login</CardTitle>
-            <CardDescription>Enter your credentials to access your account</CardDescription>
+            <CardDescription>
+              Enter your credentials to access your account
+            </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Login as</Label>
+                <RadioGroup
+                  defaultValue="job_seeker"
+                  onValueChange={(value) => setRole(value as UserRole)}
+                  className="flex space-x-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="job_seeker" id="login_job_seeker" />
+                    <Label htmlFor="login_job_seeker">Job Seeker</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="employer" id="login_employer" />
+                    <Label htmlFor="login_employer">Employer</Label>
+                  </div>
+                </RadioGroup>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -52,13 +111,21 @@ export default function LoginPage() {
                   required
                 />
               </div>
+              <div className="flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full">
-                Login
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? <Spinner /> : "Login"}
               </Button>
               <p className="text-sm text-center">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link href="/signup" className="text-primary hover:underline">
                   Sign up
                 </Link>
@@ -67,8 +134,6 @@ export default function LoginPage() {
           </form>
         </Card>
       </main>
-      <Footer />
     </div>
-  )
+  );
 }
-
