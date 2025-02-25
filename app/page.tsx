@@ -162,7 +162,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="text-center">
+        {/* <section className="text-center">
           <h2 className="text-3xl font-bold mb-6">
             Ready to Start Your Journey?
           </h2>
@@ -171,7 +171,7 @@ export default function Home() {
               Join Guhuza Now <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
-        </section>
+        </section> */}
       </main>
     </div>
   );

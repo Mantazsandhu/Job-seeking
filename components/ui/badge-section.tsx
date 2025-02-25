@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription } from "@/components/ui/card";
-import { getBadges } from "@/lib/badge";
+import { getBadges } from "@/lib/badgeActions";
 import * as LucideIcons from "lucide-react"; // Import all icons
 
 interface BadgeType {

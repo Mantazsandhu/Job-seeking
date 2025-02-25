@@ -50,8 +50,24 @@ model Profile {
   skills       Skill[]
   achievements Achievement[]
   avatar       String?
+  reviews   Review[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  rating       Int
+  comment      String
+  reviewerName String
+  reviewerId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  profile      Profile  @relation(fields: [profileId], references: [id])
+  profileId    Int  
+
+
+  @@index([profileId])
 }
 
 model Experience {
@@ -111,18 +127,20 @@ model User {
   address     String?
   role        String
   createdAt   DateTime         @default(now())
-  leaderboard Leaderboard?
-  invites     Invite[]         // Track invites sent by the user
-  profile     Profile?         // User's profile
-  accounts    Account[]        // User accounts (e.g., OAuth providers)
-  sessions    Session[]        // User sessions
-  levelProgress UserLevelProgress[]  // User's level progress tracking
-  userBadges    UserBadge[]    // Relation to UserBadge
+  leaderboard Leaderboard[]
+  invites     Invite[]        
+  profile     Profile?         
+  accounts    Account[]       
+  sessions    Session[]       
+  levelProgress UserLevelProgress[] 
+  userBadges    UserBadge[]    
   userAnswerSubmissions UserAnswerSubmission[]
   referralCode String @unique @default(uuid())
   referredBy   String?
   applications Application[]
   jobsPosted   Job[]
+  resetPasswordToken String?
+  resetPasswordExpires DateTime?
 }
 
 model Category {
@@ -131,18 +149,18 @@ model Category {
   description String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  subCategories SubCategory[] // Categories have sub-categories
+  subCategories SubCategory[] 
 }
 
 model SubCategory {
   id          Int         @id @default(autoincrement())
   name        String
   description String?
-  categoryId  Int         // Category that this sub-category belongs to
+  categoryId  Int        
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade) // Relate to Category
-  questions   Question[]  // Sub-categories will have questions
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade) 
+  questions   Question[]  
    userLevelProgress UserLevelProgress[]
   userAnswerSubmissions UserAnswerSubmission[]
 
@@ -152,7 +170,7 @@ model Question {
   id            Int        @id @default(autoincrement())
   level         Level      @relation(fields: [levelId], references: [id])
   levelId       Int
-  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id]) // SubCategory relation
+  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id]) 
   subCategoryId Int?
   question      String
   correctAnswer Int
@@ -169,9 +187,9 @@ model Level {
   point     Point      @relation(fields: [pointId], references: [id])
   pointId   Int
   createdAt DateTime   @default(now())
-  questions Question[] // Questions related to this level
+  questions Question[] 
 
-  userProgress UserLevelProgress[]  // Users who have completed this level
+  userProgress UserLevelProgress[]  
   userAnswerSubmissions UserAnswerSubmission[]
 
 }
@@ -186,7 +204,7 @@ model UserLevelProgress {
   subcategoryId Int      
   createdAt   DateTime   @default(now())
 
-  @@unique([userId, levelId,subcategoryId])  // Ensure a user can only have one progress per level
+  @@unique([userId, levelId,subcategoryId])  
 }
 
 
@@ -195,10 +213,10 @@ model Badge {
   name            String
   description     String
   icon        String?
-  pointThreshold  String?        // The point threshold needed to earn the badge
+  pointThreshold  String?      
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
-  userBadges      UserBadge[]  // Relation to UserBadge
+  userBadges      UserBadge[]  
 }
 
 model UserBadge {
@@ -207,11 +225,11 @@ model UserBadge {
   badgeId     Int      @map("badge_id")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   badge       Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-  earnedAt    DateTime @default(now())  // The time when the badge was earned
+  earnedAt    DateTime @default(now())  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@unique([userId, badgeId])  // A user can only earn a badge once
+  @@unique([userId, badgeId])  
   @@map("user_badges")
 }
 
@@ -225,9 +243,9 @@ model Leaderboard {
 
 model Point {
   id        Int      @id @default(autoincrement())
-  point     Int      // Points awarded
+  point     Int     
   createdAt DateTime @default(now())
-  levels    Level[]  // Points awarded for levels
+  levels    Level[]  
   questions Question[]
 }
 
@@ -235,8 +253,8 @@ model UserAnswerSubmission {
   id            Int        @id @default(autoincrement())
   userId        String     @map("user_id")
   questionId    Int        @map("question_id")
-  answer        String     // User's submitted answer
-  isCorrect     Boolean    // Whether the user's answer was correct
+  answer        String    
+  isCorrect     Boolean    
   levelId       Int        @map("level_id")
   subcategoryId Int        @map("subcategory_id")
   createdAt     DateTime   @default(now())

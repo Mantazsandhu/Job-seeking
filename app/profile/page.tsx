@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -6,126 +7,227 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Header } from "@/app/components/Header";
-import { Footer } from "@/app/components/Footer";
+import { Progress } from "@/components/ui/progress";
+import { StarIcon } from "lucide-react";
+import { ProfileEditor } from "@/components/profile/ProfileEditor";
+import {
+  getJobsPostedByUser,
+  getProfile,
+  getUserApplication,
+  updateProfile,
+} from "@/lib/profileActions";
+import { auth } from "@/auth";
+import Badges from "@/components/Badges";
+import { revalidatePath } from "next/cache";
+import { getReviewsByUserId } from "@/lib/reviewActions";
+import { formatDateWithMonth } from "@/lib/utils";
+import { getUserBadges } from "@/lib/badgeActions";
 
-// Helper function to get a random avatar image
-function getRandomAvatar(gender: "male" | "female") {
-  const index = Math.floor(Math.random() * 10) + 1; // 1 to 10
-  return `/avatars/${gender}${index}.png`;
+async function updateProfileAction(formData: FormData) {
+  "use server";
+
+  const session = await auth();
+  if (!session || !session.user?.id) {
+    throw new Error("Not authenticated or user ID missing");
+  }
+
+  await updateProfile(session.user.id, formData);
+  revalidatePath("/profile");
 }
 
-export default function ProfilePage() {
-  // Placeholder data for the profile
-  const profile = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: getRandomAvatar("male"),
-    score: 1250,
-    gamesPlayed: 15,
-    qualification: "MSc in Computer Science",
-    skills: ["JavaScript", "React", "Node.js", "Python"],
-    badges: [
-      { name: "Resume Master", description: "Created a perfect resume" },
-      { name: "Interview Ace", description: "Passed 10 interview simulations" },
-      {
-        name: "Networking Pro",
-        description: "Connected with 50 professionals",
-      },
-    ],
-    recentGames: [
-      { date: "2025-01-20", score: 65 },
-      { date: "2025-01-18", score: 70 },
-      { date: "2025-01-15", score: 55 },
-    ],
+export default async function ProfilePage() {
+  const session = await auth();
+  if (!session) {
+    redirect("/login");
+  }
+  const user = session.user;
+
+  const profile = await getProfile(user.id);
+  const jobApplications = await getUserApplication(user.id);
+  const jobPosted = await getJobsPostedByUser(user.id);
+  const reviews = await getReviewsByUserId(user.id);
+  const badgeData = await getUserBadges(user.id);
+
+  const isEliteChallenger = badgeData.find(
+    (badge) => badge.name === "Elite Challenger"
+  );
+
+  const getProficiencyColor = (proficiency: number) => {
+    if (proficiency >= 80) return "bg-green-500";
+    if (proficiency >= 60) return "bg-blue-500";
+    if (proficiency >= 40) return "bg-yellow-500";
+    return "bg-red-500";
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-4 mb-4">
-                <Avatar className="w-20 h-20">
-                  <AvatarImage src={profile.avatar} alt={profile.name} />
-                  <AvatarFallback>{profile.name[0]}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h2 className="text-2xl font-bold">{profile.name}</h2>
-                  <p className="text-muted-foreground">{profile.email}</p>
-                  <p className="text-sm">{profile.qualification}</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p>
-                  <strong>Total Score:</strong> {profile.score}
-                </p>
-                <p>
-                  <strong>Games Played:</strong> {profile.gamesPlayed}
-                </p>
-                <div>
-                  <strong>Skills:</strong>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {profile.skills.map((skill, index) => (
-                      <Badge key={index} variant="outline">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card className="bg-gray-100">
+              <CardHeader>
+                <CardTitle>Profile Information</CardTitle>
+                <CardDescription>Your professional details</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProfileEditor
+                  profile={profile}
+                  updateProfile={updateProfileAction}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Badges</CardTitle>
-              <CardDescription>Achievements you've earned</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {profile.badges.map((badge, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Badge variant="secondary" className="p-2">
-                      {badge.name}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {badge.description}
-                    </span>
+          <div className="space-y-6">
+            <Badges badgeData={badgeData} />
+
+            {user.role === "JOB_SEEKER" ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Job Applications</CardTitle>
+                  <CardDescription>
+                    Your current job applications
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {jobApplications.length === 0 ? (
+                      <p>No job applications available.</p>
+                    ) : (
+                      jobApplications.map((job, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between border-b pb-2"
+                        >
+                          <div>
+                            <p className="font-semibold">{job.title}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {job.company}
+                            </p>
+                          </div>
+                          <Badge
+                            variant={
+                              job.status === "ACCEPTED"
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
+                            {job.status}
+                          </Badge>
+                        </div>
+                      ))
+                    )}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Posted Jobs</CardTitle>
+                  <CardDescription>Your posted jobs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {jobPosted.length === 0 ? (
+                      <p>No posted jobs available.</p>
+                    ) : (
+                      jobPosted.map((job, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between border-b pb-2"
+                        >
+                          <div>
+                            <p className="font-semibold">{job.title}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {job.company}
+                            </p>
+                          </div>
+                          <p className="text-sm mt-2">
+                            Applications: {job.applications.length}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Skill Levels</CardTitle>
+                <CardDescription>
+                  Your proficiency in various skills
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {(profile?.skills ?? []).length === 0 ? (
+                    <p>No skills details provided.</p>
+                  ) : (
+                    profile?.skills?.map((skill, index) => {
+                      const color = getProficiencyColor(skill.proficiency);
+                      return (
+                        <div key={index} className="space-y-2">
+                          <div className="flex justify-between">
+                            <span>{skill.skillName}</span>
+                            <span>{skill.proficiency}%</span>
+                          </div>
+                          <Progress
+                            value={skill.proficiency}
+                            className="w-full"
+                            indicatorColor={color}
+                          />
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            {isEliteChallenger && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Reviews</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {reviews?.length > 0 ? (
+                      reviews.map((review) => (
+                        <div key={review.id} className="border-b pb-4">
+                          <div className="flex justify-between items-center">
+                            <h4 className="font-semibold">
+                              {review.reviewerName}
+                            </h4>
+                            <Badge variant="secondary">
+                              {formatDateWithMonth(review.createdAt.toString())}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center my-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <StarIcon
+                                key={star}
+                                className={`w-4 h-4 ${
+                                  star <= review.rating
+                                    ? "text-yellow-400 fill-current"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-sm mt-1">{review.comment}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No reviews yet. Be the first to leave a review!</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
-
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Recent Games</CardTitle>
-            <CardDescription>Your latest game performances</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {profile.recentGames.map((game, index) => (
-                <li
-                  key={index}
-                  className="flex justify-between items-center p-2 bg-secondary rounded-lg"
-                >
-                  <span>{game.date}</span>
-                  <span className="font-bold">Score: {game.score}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
       </main>
-      <Footer />
     </div>
   );
 }

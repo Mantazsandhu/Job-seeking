@@ -8,7 +8,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import React, { useEffect, useState } from "react";
-import { JobGame } from "./JobGame";
+import { JobGame } from "./Game/JobGame";
 import { getCategories } from "@/lib/dataActions";
 
 export type Category = {

@@ -1,4 +1,3 @@
-// app/types/auth.ts
 export interface SignupData {
   fullName: string;
   email: string;

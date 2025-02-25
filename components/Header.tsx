@@ -8,17 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, User, LogOut } from "lucide-react";
-import { auth, signOut } from "@/auth";
+import { ChevronDown } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { logoutAction } from "@/lib/userActions";
 import Spinner from "./ui/spinner/spinner";
+import HeaderMenu from "./ui/header-menu";
 
 export function Header() {
-  
   const { data, status } = useSession();
   const isLoggedIn = status === "authenticated";
   const isLoading = status === "loading";
+
   return (
     <header className="bg-black border-b">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -88,15 +87,28 @@ export function Header() {
                     Take a quiz
                   </Button>
                 </Link>
-                <form action={logoutAction}>
-                  <Button
-                    type="submit"
-                    variant="ghost"
-                    className="text-white hover:text-white hover:bg-gray-800"
-                  >
-                    Logout
-                  </Button>
-                </form>
+                {isLoggedIn && data?.user.role === "JOB_SEEKER" && (
+                  <Link href="/jobs">
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:text-white hover:bg-gray-800"
+                    >
+                      Jobs
+                    </Button>
+                  </Link>
+                )}
+
+                {isLoggedIn && data?.user.role === "EMPLOYER" && (
+                  <Link href="/employer/dashboard">
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:text-white hover:bg-gray-800"
+                    >
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
+                <HeaderMenu userId={data?.user.id} />
               </>
             ) : (
               <>

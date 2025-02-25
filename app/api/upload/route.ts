@@ -2,13 +2,13 @@ import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import prisma from "@/prisma/prisma"; // Adjust this based on your ORM setup
+import prisma from "@/prisma/prisma";
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const userId = formData.get("userId") as string; // Ensure user ID is passed
+    const userId = formData.get("userId") as string;
 
     if (!file || !userId) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -28,14 +28,13 @@ export async function POST(request: NextRequest) {
     const filepath = path.join(uploadDir, filename);
     await writeFile(filepath, buffer);
 
-    const imageUrl = `/uploads/${filename}`; // Store this in the DB
+    const imageUrl = `/uploads/${filename}`;
 
-    // ✅ Update the user's profile in the database
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         profile: {
-          update: { avatar: imageUrl }, // Update the avatar in the profile
+          update: { avatar: imageUrl },
         },
       },
     });

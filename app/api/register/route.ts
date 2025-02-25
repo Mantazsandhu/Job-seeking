@@ -2,7 +2,7 @@ import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 import prisma from "@/prisma/prisma";
 import { ZodError } from "zod";
-import checkAndAssignBadges from "@/lib/badge";
+import checkAndAssignBadges from "@/lib/badgeActions";
 
 export async function POST(req: Request) {
   try {
@@ -16,11 +16,10 @@ export async function POST(req: Request) {
 
     let referrer = null;
 
-    // ✅ Check if referral code exists
     if (body.referredBy) {
       referrer = await prisma.user.findUnique({
         where: { referralCode: body.referredBy },
-        include: { leaderboard: true }, // Include leaderboard data
+        include: { leaderboard: true },
       });
 
       if (!referrer) {
@@ -39,6 +38,30 @@ export async function POST(req: Request) {
         role: body.role,
         phoneNumber: body.phoneNumber,
         referredBy: body.referredBy,
+        profile: {
+          create: {
+            bio: "",
+            avatar: null,
+            education: {
+              create: [],
+            },
+            experience: {
+              create: [],
+            },
+            skills: {
+              create: [],
+            },
+            achievements: {
+              create: [],
+            },
+            reviews: {
+              create: [],
+            },
+          },
+        },
+      },
+      include: {
+        profile: true,
       },
     });
 

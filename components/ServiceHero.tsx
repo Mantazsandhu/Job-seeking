@@ -12,16 +12,14 @@ export function ServiceHero({
   imageSrc,
 }: ServiceHeroProps) {
   const handleBookDemo = () => {
-    // Replace with your Calendly URL
     window.open(
-      "https://calendly.com/mantazs946/30min",
+      process.env.NEXT_PUBLIC_CALENDLY_LINK,
       "_blank"
     );
   };
 
   return (
     <div className="relative pb-24">
-      {/* Hero Image */}
       <div className="absolute inset-0 z-0 h-[500px]">
         <img
           src={imageSrc || "/placeholder.svg"}
@@ -30,7 +28,6 @@ export function ServiceHero({
         />
       </div>
 
-      {/* Content */}
       <div className="relative z-10 container mx-auto px-4 h-[500px] flex items-center">
         <div className="max-w-3xl text-white">
           <h1 className="text-5xl font-bold mb-6">{title}</h1>

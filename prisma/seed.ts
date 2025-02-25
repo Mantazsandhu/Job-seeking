@@ -21,18 +21,18 @@ async function main() {
   // await seedBadges();
   // await seedCategories();
   // await seedSubCategories();
-  // await createQuestionOne();
-  // await createQuestionTwo();
-  // await createQuestionThree();
-  // await createQuestionFour();
-  // await createQuestionFive();
-  // await createQuestionSix();
-  // await createQuestionSeven();
-  // await createQuestionEight();
-  // await createQuestionNine();
-  // await createQuestionTen();
-  // await createQuestionEleven();
-  // await createQuestionTwelve();
+  await createQuestionOne();
+  await createQuestionTwo();
+  await createQuestionThree();
+  await createQuestionFour();
+  await createQuestionFive();
+  await createQuestionSix();
+  await createQuestionSeven();
+  await createQuestionEight();
+  await createQuestionNine();
+  await createQuestionTen();
+  await createQuestionEleven();
+  await createQuestionTwelve();
 
   console.log("All seed data inserted successfully !");
 }

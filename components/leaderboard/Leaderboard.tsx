@@ -2,11 +2,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { getLeaderboardData, type LeaderboardEntry } from "@/lib/leaderboard";
+import {
+  getLeaderboardData,
+  type LeaderboardEntry,
+} from "@/lib/leaderboardActions";
 import { Suspense } from "react";
 import { getRoleName } from "@/lib/utils";
 import { Badge } from "../ui/badge";
 import { Crown, Flame, Medal, Trophy } from "lucide-react";
+import { auth } from "@/auth";
 
 function LeaderboardSkeleton() {
   return (
@@ -45,6 +49,8 @@ const getRankIcon = (rank: number) => {
 
 async function LeaderboardContent() {
   const leaderboardData = await getLeaderboardData();
+  const session = await auth();
+  const userId = session?.user.id;
 
   return (
     <div className="space-y-4">
@@ -82,12 +88,18 @@ async function LeaderboardContent() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <Link
-                    href={`/profile/${entry.user.id}`}
-                    className="inline-block text-lg font-semibold hover:text-primary hover:underline truncate"
-                  >
-                    {entry.user.fullName || "Anonymous"}
-                  </Link>
+                  {userId === entry.user.id ? (
+                    <span className="inline-block text-lg font-semibold truncate">
+                      {entry.user.fullName || "Anonymous"}
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/profile/${entry.user.id}`}
+                      className="inline-block text-lg font-semibold hover:text-primary hover:underline truncate"
+                    >
+                      {entry.user.fullName || "Anonymous"}
+                    </Link>
+                  )}
                   <p className="text-sm text-muted-foreground">
                     {entry.user.profile?.education ||
                       getRoleName(entry.user.role) ||

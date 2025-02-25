@@ -84,8 +84,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         redirectUrl.searchParams.append("callbackUrl", nextUrl.href);
         return Response.redirect(redirectUrl);
       }
+
       return true;
     },
+
     jwt: ({ token, user, account }) => {
       if (account) {
         token.accessToken = account.access_token;
@@ -94,6 +96,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.role = user.role;
         }
       }
+
       return token;
     },
     session(params: any) {

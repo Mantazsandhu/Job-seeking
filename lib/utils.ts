@@ -15,3 +15,22 @@ export function getRoleName(role: string) {
       return role;
   }
 }
+
+export const formatDate = (dateString: string | null) => {
+  if (!dateString) return "Present";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+  });
+};
+
+export const formatDateWithMonth = (dateString: string | null) => {
+  if (!dateString) return "Present";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    day: "numeric",
+    year: "numeric",
+    month: "short",
+  });
+};

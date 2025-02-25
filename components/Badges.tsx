@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { getUserBadges } from "@/lib/badge";
+import { getUserBadges } from "@/lib/badgeActions";
 import { Badge } from "./ui/badge";
 
 // Define a type for badge
@@ -17,28 +17,7 @@ interface BadgeData {
   name: string;
 }
 
-interface BadgeProps {
-  userId: string;
-}
-
-export const Badges = ({ userId }: BadgeProps) => {
-  const [badgeData, setBadgeData] = useState<BadgeData[]>([]);
-
-  useEffect(() => {
-    const fetchBadgeData = async () => {
-      try {
-        const data = await getUserBadges(userId); // Get user badges
-        setBadgeData(data); // Set the data to state
-      } catch (error) {
-        console.error("Error fetching badge data:", error);
-      }
-    };
-
-    if (userId) {
-      fetchBadgeData(); // Call the async function only if userId is available
-    }
-  }, [userId]);
-
+export const Badges = ({ badgeData }: { badgeData: BadgeData[] }) => {
   return (
     <Card>
       <CardHeader>
@@ -47,8 +26,8 @@ export const Badges = ({ userId }: BadgeProps) => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">
-          {badgeData.length > 0 ? (
-            badgeData.map((badge) => (
+          {badgeData?.length > 0 ? (
+            badgeData?.map((badge) => (
               <Badge key={badge.id} variant="secondary" className="p-2">
                 {badge.name}
               </Badge>
