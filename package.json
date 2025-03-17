@@ -12,7 +12,7 @@
     "db:studio": "npx prisma studio",
     "db:seed": "npx prisma db seed",
     "docker:up": "docker-compose up -d",
-    "postinstall": "npx primsa generate"
+    "postinstall": "npx prisma generate"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
