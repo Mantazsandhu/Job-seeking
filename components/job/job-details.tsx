@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "@radix-ui/react-select";
+import { formatSalary } from "@/lib/utils";
 
 export default function JobDetails({
   selectedJobId,
@@ -281,7 +282,7 @@ export default function JobDetails({
               <DollarSign className="h-3 w-3 mr-1" /> Salary
             </span>
             <span className="text-sm font-medium">
-              ${selectedJob.salary.toLocaleString()}
+              ${formatSalary(selectedJob.salary)}
             </span>
           </div>
 

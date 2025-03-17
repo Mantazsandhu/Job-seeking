@@ -10,6 +10,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { Badge } from "../ui/badge";
+import { formatSalary } from "@/lib/utils";
 
 export default function JobsList({
   jobs,
@@ -133,7 +134,7 @@ export default function JobsList({
 
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-3.5 w-3.5" />
-                      <span>${job.salary.toLocaleString()}</span>
+                      <span>${formatSalary(job.salary)}</span>
                     </div>
 
                     <div className="flex items-center gap-1">
