@@ -1,6 +1,4 @@
-export const config = {
-  runtime: 'nodejs', // Make sure the runtime is set to Node.js
-};
+
 import NextAuth, { User } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "./prisma/prisma";
