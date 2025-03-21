@@ -6,6 +6,7 @@ import { hash } from "bcryptjs";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import nodemailer from "nodemailer";
+import { redirect } from "next/navigation";
 
 const prisma = new PrismaClient();
 
@@ -132,7 +133,8 @@ export async function getUserReferrals(referralCode: string) {
 }
 
 export const logoutAction = async () => {
-  await signOut();
+  await signOut({ redirect: false });
+  redirect("/");
 };
 
 export async function resetPassword(token: string, newPassword: string) {
