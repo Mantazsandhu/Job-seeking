@@ -35,7 +35,7 @@ async function checkAndAssignBadges() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    throw new Error("You must be logged in to submit answers");
+    return [];
   }
 
   const userId = session.user.id;
