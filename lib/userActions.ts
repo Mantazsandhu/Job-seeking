@@ -133,7 +133,8 @@ export async function getUserReferrals(referralCode: string) {
 }
 
 export const logoutAction = async () => {
-  await signOut();
+  await signOut({ redirect: false });
+  redirect("/");
 };
 
 export async function resetPassword(token: string, newPassword: string) {
