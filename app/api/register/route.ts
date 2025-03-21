@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       ]);
     }
 
-    await checkAndAssignBadges(user.id);
+    await checkAndAssignBadges();
 
     return NextResponse.json({
       user: {
