@@ -6,8 +6,6 @@ import { checkLevelCompletion } from "@/lib/userActions";
 async function getInitialLevelData(level: number) {
   try {
     const levelCompletion = await checkLevelCompletion(level);
-    console.log("levelcompletion", levelCompletion);
-    console.log("level", level);
     const apiUrl = "https://api-ghz-v2.azurewebsites.net/api/v2/quiz";
     const response = await fetch(`${apiUrl}?level=${level}`, {
       cache: "no-store",
@@ -39,7 +37,6 @@ async function getInitialLevelData(level: number) {
             `Option C for question ${i + 1}`,
           ],
         })),
-      nextLevel: level + 1,
       levelCompleted: false,
     };
   }
