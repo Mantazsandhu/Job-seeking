@@ -74,6 +74,31 @@ export async function saveUserLevelProgress(levelId: number) {
   }
 }
 
+export async function getUserCompletedLevels() {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return [];
+    }
+
+    const userId = session.user.id;
+    const completedLevels = await prisma.userLevelProgress.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        levelId: true,
+      },
+    });
+
+    return completedLevels.map((level) => level.levelId);
+  } catch (error) {
+    console.error("Error fetching completed levels:", error);
+    return [];
+  }
+}
+
 export async function checkLevelCompletion(levelId: number) {
   try {
     const session = await auth();
