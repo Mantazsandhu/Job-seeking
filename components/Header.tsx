@@ -19,7 +19,7 @@ export function Header() {
   const isLoading = status === "loading";
 
   return (
-    <header className="bg-black border-b">
+    <header className="bg-black border-b z-10">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="text-xl font-semibold">
           <Image
